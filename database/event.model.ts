@@ -106,10 +106,12 @@ const EventSchema = new Schema<IEvent>(
 );
 
 // Pre-save hook: generate slug from title and normalize date/time
-EventSchema.pre('save', function (next) {
+EventSchema.pre('save', async function (this: IEvent) {
+  const event = this as IEvent;
+  
   // Generate slug only if title is new or modified
-  if (this.isModified('title')) {
-    this.slug = this.title
+  if (event.isModified('title')) {
+    event.slug = event.title
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '') // Remove special characters
@@ -119,32 +121,29 @@ EventSchema.pre('save', function (next) {
   }
 
   // Normalize date to ISO format if modified
-  if (this.isModified('date')) {
+  if (event.isModified('date')) {
     try {
-      const parsedDate = new Date(this.date);
+      const parsedDate = new Date(event.date);
       if (isNaN(parsedDate.getTime())) {
-        return next(new Error('Invalid date format'));
+        throw new Error('Invalid date format');
       }
       // Store date in ISO format (YYYY-MM-DD)
-      this.date = parsedDate.toISOString().split('T')[0];
+      event.date = parsedDate.toISOString().split('T')[0];
     } catch (error) {
-      return next(new Error('Invalid date format'));
+      throw new Error('Invalid date format');
     }
   }
 
   // Normalize time format (HH:MM) if modified
-  if (this.isModified('time')) {
+  if (event.isModified('time')) {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(this.time)) {
-      return next(new Error('Time must be in HH:MM format'));
+    if (!timeRegex.test(event.time)) {
+      throw new Error('Time must be in HH:MM format');
     }
   }
-
-  next();
 });
 
 // Create unique index on slug for faster lookups
-EventSchema.index({ slug: 1 });
 
 // Export Event model (use existing model if already compiled)
 const Event: Model<IEvent> =
