@@ -21,9 +21,15 @@ interface ErrorResponse {
 }
 
 /**
- * GET /api/events/[slug]
+ * Fetches a single event by its slug.
  *
- * Returns a single event by its slug with robust validation and error handling.
+ * Validates the `slug` route parameter (presence, non-empty, and allowed characters),
+ * normalizes it to lowercase, and returns the matching event or an error response
+ * with an appropriate HTTP status.
+ *
+ * @param context - An object with `params: Promise<{ slug: string }>` containing the route `slug`
+ * @returns A NextResponse containing an EventSuccessResponse with the event on success (HTTP 200),
+ * or an ErrorResponse with an explanatory message (HTTP 400 for invalid slug, 404 if not found, 500 on server error).
  */
 export async function GET(
   _req: NextRequest,
