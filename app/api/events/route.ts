@@ -4,6 +4,14 @@ import { Event } from "@/database";
 import connectDB from "@/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Create a new event from multipart form data, upload its image to Cloudinary, and persist the event to the database.
+ *
+ * Performs validation of the event's `mode` (must be "online", "offline", or "hybrid"), requires an `image` file,
+ * parses `tags` and `agenda` from JSON fields, and stores the uploaded image URL on the created event.
+ *
+ * @returns A JSON response containing a success message and the created event on success; a JSON error message for invalid input (e.g., invalid mode, missing image, malformed JSON) or on server failure.
+ */
 export async function POST(req: NextRequest) {
     try{
         await connectDB();
@@ -69,6 +77,14 @@ export async function POST(req: NextRequest) {
     }
 }
 
+/**
+ * Retrieve all events from the database, sorted by creation time in descending order.
+ *
+ * Returns a JSON response containing a `message` and an `events` array of Event documents on success;
+ * on failure, returns a JSON response with a `message` and an `error` describing the failure.
+ *
+ * @returns A JSON object with `message` and `events` on success, or `message` and `error` on failure.
+ */
 export async function GET() {
     try {
         await connectDB();
@@ -81,4 +97,3 @@ export async function GET() {
         return NextResponse.json({ message: 'Event fetching failed', error: e }, { status: 500 })
     }
 }
-
