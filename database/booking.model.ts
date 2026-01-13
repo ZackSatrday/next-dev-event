@@ -47,7 +47,12 @@ BookingSchema.pre('save', async function (this: IBooking) {
         throw new Error(`Event with ID ${this.eventId} does not exist`);
       }
     } catch (error) {
-      throw new Error('Failed to validate event reference');
+      // Preserve the original error message to aid debugging and validation
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error(`Failed to validate event reference: ${String(error)}`);
     }
   }
 });

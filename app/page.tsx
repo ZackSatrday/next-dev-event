@@ -1,27 +1,15 @@
-import  EventCard from '@/app/components/EventCard'
+import EventCard from '@/app/components/EventCard'
 import ExploreBtn from '@/app/components/ExploreBtn'
-import { IEvent } from '@/database';
+import { type IEvent } from '@/database';
+import { getEvents } from '@/lib/actions/event.actions';
 import { cacheLife } from 'next/cache';
-// import {events} from '@/lib/constants'
-
-// const events = [
-//   { 
-//     image: '/images/event1.png', 
-//     title: 'Event 1',
-//     slug: 'event-1',
-//     location: 'location-1',
-//     date: 'Date-1',
-//     time: 'Time-1',
-//   },
-// ]
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
 
 const page = async () => {
   'use cache'
   cacheLife('hours')
-  const response = await fetch(`${BASE_URL}/api/events`)
-  const { events } = await response.json();
+
+  // Use shared data access instead of server-to-server fetch
+  const events: IEvent[] = await getEvents();
 
   return (
     <section>

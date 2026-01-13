@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary'
+import cloudinary from "@/lib/cloudinary";
 
 import { Event } from "@/database";
 import connectDB from "@/lib/mongodb";
@@ -40,8 +40,61 @@ export async function POST(req: NextRequest) {
 
         if(!file) return NextResponse.json({ message: 'Image file is required'}, { status: 400 })
 
-        let tags = JSON.parse(formData.get('tags') as string)
-        let agenda = JSON.parse(formData.get('agenda') as string)
+        const rawTags = formData.get('tags');
+        const rawAgenda = formData.get('agenda');
+
+        if (typeof rawTags !== 'string') {
+            return NextResponse.json({
+                message: 'Invalid tags format',
+                error: 'Field "tags" is required and must be a JSON stringified array of strings.',
+            }, { status: 400 });
+        }
+
+        if (typeof rawAgenda !== 'string') {
+            return NextResponse.json({
+                message: 'Invalid agenda format',
+                error: 'Field "agenda" is required and must be a JSON stringified array of strings.',
+            }, { status: 400 });
+        }
+
+        let tags: string[];
+        let agenda: string[];
+
+        try {
+            const parsedTags = JSON.parse(rawTags) as unknown;
+
+            if (!Array.isArray(parsedTags) || !parsedTags.every(tag => typeof tag === 'string' && tag.trim().length > 0)) {
+                return NextResponse.json({
+                    message: 'Invalid tags value',
+                    error: 'Field "tags" must be a non-empty JSON array of non-empty strings.',
+                }, { status: 400 });
+            }
+
+            tags = parsedTags.map(tag => tag.trim());
+        } catch {
+            return NextResponse.json({
+                message: 'Invalid tags JSON',
+                error: 'Field "tags" must contain valid JSON.',
+            }, { status: 400 });
+        }
+
+        try {
+            const parsedAgenda = JSON.parse(rawAgenda) as unknown;
+
+            if (!Array.isArray(parsedAgenda) || !parsedAgenda.every(item => typeof item === 'string' && item.trim().length > 0)) {
+                return NextResponse.json({
+                    message: 'Invalid agenda value',
+                    error: 'Field "agenda" must be a non-empty JSON array of non-empty strings.',
+                }, { status: 400 });
+            }
+
+            agenda = parsedAgenda.map(item => item.trim());
+        } catch {
+            return NextResponse.json({
+                message: 'Invalid agenda JSON',
+                error: 'Field "agenda" must contain valid JSON.',
+            }, { status: 400 });
+        }
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer)
@@ -78,7 +131,9 @@ export async function GET() {
         return NextResponse.json({ message: 'Events fetched successfully', events}, { status: 200 })
 
     } catch (e) {
-        return NextResponse.json({ message: 'Event fetching failed', error: e }, { status: 500 })
+        console.error(e);
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred while fetching events';
+        return NextResponse.json({ message: 'Event fetching failed', error: errorMessage }, { status: 500 })
     }
 }
 
