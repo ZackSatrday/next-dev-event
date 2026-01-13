@@ -137,9 +137,19 @@ EventSchema.pre('save', async function (this: IEvent) {
   // Normalize time format (HH:MM) if modified
   if (event.isModified('time')) {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(event.time)) {
+
+    if (typeof event.time !== 'string') {
       throw new Error('Time must be in HH:MM format');
     }
+
+    const [hour, minute] = event.time.split(':');
+
+    if (!hour || !minute || !timeRegex.test(event.time)) {
+      throw new Error('Time must be in HH:MM format');
+    }
+
+    // Normalize to always store 2-digit hours (e.g. 9:30 -> 09:30)
+    event.time = `${hour.padStart(2, '0')}:${minute}`;
   }
 });
 
