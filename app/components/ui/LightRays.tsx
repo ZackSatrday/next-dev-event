@@ -36,10 +36,10 @@ const hexToRgb = (hex: string): [number, number, number] => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return m
     ? [
-        parseInt(m[1], 16) / 255,
-        parseInt(m[2], 16) / 255,
-        parseInt(m[3], 16) / 255,
-      ]
+      parseInt(m[1], 16) / 255,
+      parseInt(m[2], 16) / 255,
+      parseInt(m[3], 16) / 255,
+    ]
     : [1, 1, 1];
 };
 
@@ -95,7 +95,13 @@ const LightRays: React.FC<LightRaysProps> = ({
   const meshRef = useRef<any>(null);
   const cleanupFunctionRef = useRef<(() => void) | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -442,9 +448,19 @@ void main() {
     }
   }, [followMouse]);
 
+  // Don't render anything during SSR to prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div
+        className={`pointer-events-none relative z-3 h-full w-full overflow-hidden ${className}`.trim()}
+      />
+    );
+  }
+
   return (
     <div
       ref={containerRef}
+      suppressHydrationWarning
       className={`pointer-events-none relative z-3 h-full w-full overflow-hidden ${className}`.trim()}
     />
   );
