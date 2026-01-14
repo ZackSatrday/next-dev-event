@@ -3,14 +3,14 @@
 import { Booking } from "@/database";
 import connectDB from "../mongodb";
 
-export const createBooking = async ( { eventId, slug, email } : { eventId: string; slug: string; email: string }) => {
+export const createBooking = async ({ eventId, email }: { eventId: string; email: string }) => {
     try {
         await connectDB();
         await Booking.create({ eventId, email });
 
-        return { success: true,};
-    } catch (error) {
+        return { success: true };
+    } catch (error: unknown) {
         console.error("Failed to create booking:", error);
-        return { success: false, error };
+        return { success: false, message: "Failed to create booking" };
     }
 };
