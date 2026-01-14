@@ -20,8 +20,8 @@ const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => (
     <h2>Agenda</h2>
 
     <ul>
-      {agendaItems.map((item) => (
-        <li key={item}>{item}</li>
+      {agendaItems.map((item, index) => (
+        <li key={`agenda-${index}`}>{item}</li>
       ))}
     </ul>
   </div>
@@ -208,7 +208,7 @@ const EventDetailsContent = async ({ params }: { params: Promise<{ slug: string 
                 Be the first to book your spot
               </p>
             )}
-            <BookEvent eventId={_id} slug={slug} />
+            <BookEvent eventId={_id} />
           </div>
         </aside>
       </div>
@@ -217,9 +217,12 @@ const EventDetailsContent = async ({ params }: { params: Promise<{ slug: string 
         <h2>Similar Events</h2>
         {similarEvents.length > 0 && (
           <ul className="events">
-            {similarEvents.map((similarEvent: IEvent) => (
+            {similarEvents.map((similarEvent: IEvent, index: number) => (
              
-                <EventCard {...similarEvent} key={similarEvent.title} />
+                <EventCard
+                  {...similarEvent}
+                  key={similarEvent._id ?? similarEvent.slug ?? `similar-${index}`}
+                />
              
             ))}
           </ul>

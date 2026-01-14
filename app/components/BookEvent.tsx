@@ -3,10 +3,11 @@
 import { createBooking } from "@/lib/actions/booking.actions"
 import { useState, useEffect, type FormEvent } from "react"
 
-const BookEvent = ({ eventId, slug }: { eventId: string; slug: string }) => {
+const BookEvent = ({ eventId }: { eventId: string }) => {
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
 
   // Prevent hydration mismatch by only rendering form after mount
@@ -22,23 +23,33 @@ const BookEvent = ({ eventId, slug }: { eventId: string; slug: string }) => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       alert("Email is required");
+      setError("Email is required");
       return;
     }
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      const { success, error } = await createBooking({ eventId, slug, email });
+      const { success, message, error } = await createBooking({ eventId, email: trimmedEmail });
 
       if (!success) {
-        console.error("Booking failed:", error);
+        const fallbackMessage =
+          (typeof error === "string" && error) ||
+          message ||
+          "Failed to create booking. Please try again.";
+        console.error("Booking failed:", fallbackMessage);
+        setError(fallbackMessage);
         return;
       }
 
       setSubmitted(true);
+      setError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred while booking.";
+      const message =
+        err instanceof Error ? err.message : "An unexpected error occurred while booking.";
       console.error("Booking failed:", message);
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -92,6 +103,12 @@ const BookEvent = ({ eventId, slug }: { eventId: string; slug: string }) => {
           >
             {isSubmitting ? "Booking..." : "Book Now"}
           </button>
+
+          {error && (
+            <p className="text-red-500 text-sm mt-2" role="alert">
+              {error}
+            </p>
+          )}
         </form>
       )
       }
