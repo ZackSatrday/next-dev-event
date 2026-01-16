@@ -31,7 +31,7 @@ const BookEvent = ({ eventId }: { eventId: string }) => {
     setError(null);
 
     try {
-      const { success, message, error } = await createBooking({ eventId, email: trimmedEmail });
+      const { success, message } = await createBooking({ eventId, email: trimmedEmail });
 
       if (!success) {
         const fallbackMessage =
@@ -67,7 +67,7 @@ const BookEvent = ({ eventId }: { eventId: string }) => {
               name="email"
               id="email"
               placeholder="Enter your email"
-              defaultValue=""
+              value=""
               readOnly
             />
           </div>

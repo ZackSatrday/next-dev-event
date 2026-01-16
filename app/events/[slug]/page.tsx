@@ -218,12 +218,12 @@ const EventDetailsContent = async ({ params }: { params: Promise<{ slug: string 
         {similarEvents.length > 0 && (
           <ul className="events">
             {similarEvents.map((similarEvent: IEvent, index: number) => (
-             
-                <EventCard
-                  {...similarEvent}
-                  key={similarEvent._id ?? similarEvent.slug ?? `similar-${index}`}
-                />
-             
+
+              <EventCard
+                {...similarEvent}
+                key={similarEvent._id?.toString() ?? similarEvent.slug ?? `similar-${index}`}
+              />
+
             ))}
           </ul>
         )}
