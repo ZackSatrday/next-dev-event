@@ -6,7 +6,7 @@ import { cacheLife } from 'next/cache';
 
 const page = async () => {
   'use cache'
-  cacheLife('hours')
+  cacheLife('minutes')
 
   // Use shared data access instead of server-to-server fetch
   const events: IEvent[] = await getEvents();
